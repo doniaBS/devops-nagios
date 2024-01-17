@@ -1,5 +1,5 @@
 # Utilisez l'image officielle Nagios Core
-FROM manios/nagios:latest
+FROM newrelic/k8s-nri-nagios:latest
 
 # Mettez à jour les packages et installez les dépendances nécessaires
 RUN apt-get update \
