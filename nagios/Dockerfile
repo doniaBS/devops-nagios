@@ -1,24 +1,36 @@
-# Utilisez l'image officielle Nagios Core
-FROM newrelic/k8s-nri-nagios:latest
+FROM alpine:3.17
 
-# Mettez à jour les packages et installez les dépendances nécessaires
-RUN apt-get update \
-    && apt-get install -y \
-        apache2 \
-        apache2-utils \
-        vim \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache \
+    ca-certificates \
+    curl \
+    git \
+    libc6-compat \
+    openssh \
+    sudo \
+    wget
 
-# Copiez votre configuration Nagios dans le conteneur
-COPY ./nagios-config /usr/local/nagios/etc/
+RUN echo "export DEBIAN_FRONTEND=noninteractive" >> /etc/profile
+RUN mkdir -p /opt/nagios
+RUN wget https://github.com/NagiosEnterprises/nagioscore/archive/refs/tags/nagioscore-6.4.6.tar.gz -O /tmp/nagioscore.tar.gz
+RUN tar xzf /tmp/nagioscore.tar.gz -C /opt/nagios --strip-components=1
 
-# Copiez vos plugins Nagios dans le conteneur
-COPY ./nagios-plugins /usr/local/nagios/libexec/
+RUN cd /opt/nagios && ./configure --prefix=/opt/nagios
+RUN make -j$(nproc) && make install
 
-# Exposez le port 80 pour accéder à l'interface web de Nagios
+RUN mkdir -p /etc/nagios
+RUN echo "source /opt/nagios/etc/nagios.cfg" >> /etc/profile
+
+RUN useradd -rM nagios -s /bin/bash -G apache
+RUN echo "nagios ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/nagios
+
+RUN chown -R nagios:nagios /opt/nagios
+RUN chown -R nagios:apache /etc/nagios
+
+RUN cd /etc/nagios && cp -f /opt/nagios/etc/nagios.sample /etc/nagios/nagios.cfg
+RUN echo "object definitions http localhost { 127.0.0.1:81; }" >> /etc/nagios/objects/commands.cfg
+
 EXPOSE 80
 
-# Démarrez Apache au lancement du conteneur
-CMD ["/usr/sbin/apache2", "-D", "FOREGROUND"]
+CMD ["/opt/nagios/bin/nagios", "-d"]
 
 
