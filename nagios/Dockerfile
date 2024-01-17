@@ -1,5 +1,5 @@
 # Utilisez l'image officielle Nagios Core
-FROM nagios/nagios-core:latest
+FROM manios/nagios:latest
 
 # Mettez à jour les packages et installez les dépendances nécessaires
 RUN apt-get update \
