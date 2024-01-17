@@ -10,7 +10,7 @@ services:
       - my-network
 
   vsftpd:
-    image: vsftpd:3.0.5-r2
+    image: instantlinux/vsftpd:latest
     ports:
       - "21:21"
     volumes:
