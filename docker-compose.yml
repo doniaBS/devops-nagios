@@ -1,0 +1,43 @@
+version: '3'
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx-config:/etc/nginx/conf.d
+    networks:
+      - my-network
+
+  vsftpd:
+    image: vsftpd:latest
+    ports:
+      - "21:21"
+    volumes:
+      - ./vsftpd-data:/data
+    networks:
+      - my-network
+
+  mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: donia
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    ports:
+      - "3306:3306"
+    networks:
+      - my-network
+
+  hadoop:
+    image: hadoop:latest
+    ports:
+      - "50070:50070"
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge
+
