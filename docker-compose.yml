@@ -10,7 +10,7 @@ services:
       - my-network
 
   vsftpd:
-    image: vsftpd:latest
+    image: vsftpd:latest:3.0.5-r2
     ports:
       - "21:21"
     volumes:
